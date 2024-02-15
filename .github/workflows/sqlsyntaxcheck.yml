@@ -18,4 +18,4 @@ jobs:
 
       - name: Run SQL linting
         run: |
-          sql-lint --ext .sql path/to/sql/files || true
+          find path/to/sql/files -type f -name "*.sql" | xargs sql-lint
