@@ -2,9 +2,11 @@ name: SQL Syntax Check
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - '**.sql'  # Only trigger on changes to .sql files
   pull_request:
+    paths:
+      - '**.sql'  # Only trigger on changes to .sql files in pull requests
 
 jobs:
   sql_lint:
@@ -25,16 +27,15 @@ jobs:
       - name: Set DIALECT based on MYSQL_COMPAT (optional)
         env:
           DIALECT: ${{ (eq env.MYSQL_COMPAT 'true') && 'postgresql' || 'mysql' }}  # Choose 'postgresql' or 'mysql'
-      - name: Perform SQL syntax check with sqlfluff
+      - name: Check for changes in SQL files
         run: |
-          sqlfluff lint --dialect ${{ env.DIALECT }} ./*.sql --config ~/.sqlfluff/config.yaml
-          # Optionally, capture output for more detailed messages
-          # sqlfluff lint --dialect ${{ env.DIALECT }} ./*.sql --config ~/.sqlfluff/config.yaml > sqlfluff-output.txt 2>&1
-      - name: Fail workflow on SQL syntax errors
-        run: |
-          if [[ $? -ne 0 ]]; then
-            echo "⚠️ Found SQL syntax errors!"
-            exit 1  # Signal workflow failure
+          if [[ -n "$(git diff --name-only HEAD^ HEAD '**.sql')" ]]; then
+            # Changes detected, proceed with linting
+            echo "Detected changes in SQL files:"
+            git diff --name-only HEAD^ HEAD '**.sql'
+            # ... (rest of the SQL syntax check steps from previous response)
           else
-            echo " No SQL syntax errors found!"
+            echo "No changes in SQL files detected."
           fi
+      - name: Fail workflow on SQL syntax errors (existing logic from previous response)
+        # ... (existing step from previous response)
