@@ -22,14 +22,19 @@ jobs:
       - name: Set MySQL compatibility flag (optional)
         env:
           MYSQL_COMPAT: ${{ github.event.inputs.mysql_compat || 'false' }}  # Default to False
+      - name: Set DIALECT based on MYSQL_COMPAT (optional)
+        env:
+          DIALECT: ${{ (eq env.MYSQL_COMPAT 'true') && 'postgresql' || 'mysql' }}  # Choose 'postgresql' or 'mysql'
       - name: Perform SQL syntax check with sqlfluff
         run: |
-          sqlfluff lint ./*.sql --config ~/.sqlfluff/config.yaml  # Adapt path if needed
+          sqlfluff lint --dialect ${{ env.DIALECT }} ./*.sql --config ~/.sqlfluff/config.yaml
+          # Optionally, capture output for more detailed messages
+          # sqlfluff lint --dialect ${{ env.DIALECT }} ./*.sql --config ~/.sqlfluff/config.yaml > sqlfluff-output.txt 2>&1
       - name: Fail workflow on SQL syntax errors
         run: |
           if [[ $? -ne 0 ]]; then
-            echo "Found SQL syntax errors!"
-            exit 1  # Exit with non-zero code to mark workflow as failed
+            echo "⚠️ Found SQL syntax errors!"
+            exit 1  # Signal workflow failure
           else
             echo " No SQL syntax errors found!"
           fi
