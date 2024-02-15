@@ -6,23 +6,20 @@ on:
       - main
 
 jobs:
-  syntax_check:
+  sql_lint:
     name: SQL Syntax Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install SQLLint
+      - name: Install sql-lint
         run: npm install -g sql-lint
 
-      - name: Find SQL files
+      - name: Run SQL linting
         run: |
-          SQL_FILES=$(find . -type f -name '*.sql')
-          echo "$SQL_FILES" > sql_files.txt
-
-      - name: Run SQLLint
-        run: |
-          while IFS= read -r FILE; do
-            sql-lint "$FILE"
-          done < sql_files.txt
+          sql-lint --dir path/to/sql/files
+          if [ $? -ne 0 ]; then
+            echo "SQL linting failed. Please check the linting results."
+            exit 1
+          fi
