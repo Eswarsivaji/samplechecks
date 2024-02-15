@@ -1,0 +1,30 @@
+name: Performance Test
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  performance_test:
+    name: Run Performance Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Apache JMeter
+        run: |
+          sudo apt-get update && sudo apt-get install -y openjdk-8-jre-headless
+          wget https://downloads.apache.org/jmeter/binaries/apache-jmeter-5.4.1.tgz
+          tar -xf apache-jmeter-5.4.1.tgz
+
+      - name: Run Performance Test
+        run: |
+          ./apache-jmeter-5.4.1/bin/jmeter -n -t path/to/testplan.jmx -l results.jtl
+
+      - name: Publish Test Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: Performance Test Results
+          path: results.jtl
