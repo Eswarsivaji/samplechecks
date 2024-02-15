@@ -1,0 +1,20 @@
+name: SQL Syntax Check
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sql_syntax_check:
+    name: Check SQL Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install sql-lint
+        run: npm install -g @rickbergfalk/sql-lint
+
+      - name: Run SQL Syntax Check
+        run: sql-lint '**/*.sql'
