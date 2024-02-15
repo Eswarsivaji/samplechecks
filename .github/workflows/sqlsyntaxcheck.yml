@@ -18,8 +18,9 @@ jobs:
 
       - name: Run SQL linting
         run: |
-          sql-lint --dir path/to/sql/files
-          if [ $? -ne 0 ]; then
-            echo "SQL linting failed. Please check the linting results."
+          lint_output=$(sql-lint --ext .sql path/to/sql/files 2>&1)
+          if [[ $lint_output == *"error"* ]]; then
+            echo "SQL linting failed. Errors found:"
+            echo "$lint_output"
             exit 1
           fi
