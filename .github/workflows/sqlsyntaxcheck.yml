@@ -1,4 +1,4 @@
-name: build release artifacts
+name: SQL Syntax Check
 
 on:
   pull_request:
@@ -6,63 +6,17 @@ on:
       - main
 
 jobs:
-  build-linux-macos:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: ['ubuntu-latest', 'macos-latest']
-      fail-fast: false
+  sql_lint:
+    name: SQL Syntax Check
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: run build
+      - name: Install sql-lint
+        run: npm install -g sql-lint
+
+      - name: Run SQL linting
         run: |
-          git submodule update --init --recursive
-          mkdir build
-          cd build && cmake -DCMAKE_BUILD_TYPE=RELEASE ..
-          make
-          
-      - name: run tests
-        run: ./build/test/test_suite
-
-      - name: create release artifacts/packages
-        run: |
-          cd build
-          make package
-      
-      - name: upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-packages
-          path: ./build/sqlcheck-x86_64.*
-
-  build-windows:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: ['windows-latest']
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.1
-        with:
-          msbuild-architecture: x64
-
-      - name: run build
-        run: |
-          git submodule update --init --recursive
-          mkdir build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=RELEASE ..
-          msbuild ALL_BUILD.vcxproj /t:Build /p:Configuration=Release              
-
-      - name: run tests
-        run: ./build/test/Release/test_suite.exe
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: release-packages
-          path: ./build/bin/Release/sqlcheck.*
+          lint_output=$(sql-lint --ext .sql path/to/sql/files 2>&1)
+          echo "$lint_output"
