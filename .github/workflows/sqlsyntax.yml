@@ -1,9 +1,6 @@
 name: SQL Syntax Check
 
 on:
-  push:
-    paths:
-      - '**.sql'  # Only trigger on changes to .sql files
   pull_request:
     paths:
       - '**.sql'  # Only trigger on changes to .sql files in pull requests
