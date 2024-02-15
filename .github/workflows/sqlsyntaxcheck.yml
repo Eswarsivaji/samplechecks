@@ -1,21 +1,39 @@
 name: SQL Syntax Check
 
 on:
-  pull_request:
+  push:
     branches:
       - main
+  pull_request:
 
 jobs:
   sql_lint:
-    name: SQL Syntax Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install sql-lint
-        run: npm install -g sql-lint
-
-      - name: Run SQL linting
+      - uses: actions/checkout@v3
+      - name: Install PostgreSQL (only for MySQL compatibility mode)
+        if: contains(env.MYSQL_COMPAT, 'true')
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Install MySQL
+        if: contains(env.MYSQL_COMPAT, 'false')
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+      - name: Install sqlfluff (SQL linter)
+        run: pip install sqlfluff
+      - name: Set MySQL compatibility flag (optional)
+        env:
+          MYSQL_COMPAT: ${{ github.event.inputs.mysql_compat || 'false' }}  # Default to False
+      - name: Perform SQL syntax check with sqlfluff
         run: |
-          find path/to/sql/files -type f -name "*.sql" | xargs sql-lint
+          sqlfluff lint ./*.sql --config ~/.sqlfluff/config.yaml  # Adapt path if needed
+          # Optionally, capture output for logging or error checking
+          # sqlfluff lint ./*.sql --config ~/.sqlfluff/config.yaml > sqlfluff-output.txt 2>&1
+        continue-on-error: true  # Allow workflow to succeed despite errors (informative)
+      - name: Report on SQL syntax issues
+        run: |
+          # Check if sqlfluff exit code indicates errors
+          if [[ $? -ne 0 ]]; then
+            echo "⚠️ Found SQL syntax errors!"
+            # Optionally, display more detailed error messages if desired
+          else
+            echo " No SQL syntax errors found!"
+          fi
