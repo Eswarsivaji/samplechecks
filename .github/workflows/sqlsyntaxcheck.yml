@@ -17,13 +17,13 @@ jobs:
 
       - name: Perform SQL syntax check with sqlfluff
         run: |
-          sqlfluff lint sample11/*.sql --config .github/.sqlfluff/config.yaml
+          sqlfluff lint sample11/*.sql 
 
       - name: Report on SQL syntax issues
         run: |
           # Check if sqlfluff exit code indicates errors
           if %ERRORLEVEL% NEQ 0 (
-            echo " Found SQL syntax errors!"
+            echo "⚠️ Found SQL syntax errors!"
             # Optionally, display more detailed error messages if desired
           ) else (
             echo " No SQL syntax errors found!"
