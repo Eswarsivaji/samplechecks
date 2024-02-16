@@ -17,7 +17,7 @@ jobs:
 
       - name: Perform SQL syntax check with sqlfluff
         run: |
-          sqlfluff lint ./*.sql --config ~/.sqlfluff/config.yaml  # Adapt path if needed
+          sqlfluff lint sample11/*.sql --config .github/.sqlfluff/config.yaml
 
       - name: Report on SQL syntax issues
         run: |
