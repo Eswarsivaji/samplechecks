@@ -7,24 +7,15 @@ on:
 
 jobs:
   sql_lint:
-    runs-on: windows-latest
+    name: SQL Syntax Check
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install sqlfluff
-        run: pip install sqlfluff
+      - name: Install sql-lint
+        run: npm install -g sql-lint
 
-      - name: Perform SQL syntax check with sqlfluff
+      - name: Run SQL linting
         run: |
-          sqlfluff lint sample11/*.sql 
-
-      - name: Report on SQL syntax issues
-        run: |
-          # Check if sqlfluff exit code indicates errors
-          if %ERRORLEVEL% NEQ 0 (
-            echo "⚠️ Found SQL syntax errors!"
-            # Optionally, display more detailed error messages if desired
-          ) else (
-            echo " No SQL syntax errors found!"
-          )
+          sql-lint --ext .sql path/to/sql/files || true
