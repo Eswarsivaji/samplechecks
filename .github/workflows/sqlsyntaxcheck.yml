@@ -17,10 +17,7 @@ jobs:
         run: npm install -g sql-lint
 
       - name: Run SQL linting
-        run: |
-          lint_output=$(sql-lint --ext .sql path/to/sql/files 2>&1)
-          if [[ $lint_output == *"error"* ]]; then
-            echo "SQL linting failed. Errors found:"
-            echo "$lint_output"
-            exit 1
-          fi
+        run: sql-lint --ext .sql path/to/sql/files
+
+      - name: Check linting exit code
+        run: exit $?
