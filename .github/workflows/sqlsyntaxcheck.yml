@@ -8,7 +8,7 @@ on:
 jobs:
   sql_lint:
     name: SQL Syntax Check
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -18,4 +18,9 @@ jobs:
 
       - name: Run SQL linting
         run: |
-          sql-lint --ext .sql path/to/sql/files || true
+          lint_output=$(sql-lint --ext .sql path/to/sql/files 2>&1)
+          if [[ $lint_output == *"error"* ]]; then
+            echo "SQL linting failed. Errors found:"
+            echo "$lint_output"
+            exit 1
+          fi
